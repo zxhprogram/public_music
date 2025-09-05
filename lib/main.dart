@@ -122,9 +122,12 @@ class SongDetailPage extends StatefulWidget {
 class _SongDetailPageState extends State<SongDetailPage> {
   PlaylistTrackAll? playlistTrackAll = null;
 
+  late final player;
+
   @override
   void initState() {
     super.initState();
+    player = Player();
     fetchPlaylistTrackAll();
   }
 
@@ -139,27 +142,37 @@ class _SongDetailPageState extends State<SongDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.song.name)),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: buildSongList(),
-          ),
-        ),
-      ),
+      body: Center(child: buildSongList()),
     );
   }
 
-  List<Widget> buildSongList() {
-    if (playlistTrackAll == null) {
-      return [Text('Loading...')];
-    } else {
-      return playlistTrackAll!.songs!
-          .map(
-            (song) =>
-                Row(children: [Text(song.id.toString()), Text(song.name)]),
-          )
-          .toList();
-    }
+  ListView buildSongList() {
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: () async {
+            print('tapped ${playlistTrackAll!.songs![index].name}');
+            var song = await song_url('${playlistTrackAll!.songs![index].id}');
+            var url = song.data![0].url;
+            print('playing $url');
+            var m = [Media(url!)];
+            var x = Playlist(m);
+            player.open(x);
+            player.play();
+          },
+          child: SizedBox(
+            height: 50,
+            width: 50,
+            child: Row(
+              children: [
+                Text(playlistTrackAll!.songs![index].id.toString()),
+                Text(playlistTrackAll!.songs![index].name),
+              ],
+            ),
+          ),
+        );
+      },
+      itemCount: playlistTrackAll == null ? 0 : playlistTrackAll!.songs!.length,
+    );
   }
 }
