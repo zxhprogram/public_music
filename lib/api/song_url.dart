@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 
+var dio = Dio(
+  BaseOptions(baseUrl: 'https://emgbuznnjdsi.ap-northeast-1.clawcloudrun.com'),
+);
 Future<SongUrl> song_url(String id) async {
-  var dio = Dio();
-  var res = await dio.get(
-    'https://ibhglpfbyfma.ap-northeast-1.clawcloudrun.com/song/url?id=$id',
-  );
+  var res = await dio.get('/song/url?id=$id');
   var songUrl = SongUrl.fromJson(res.data);
   return songUrl;
 }
@@ -26,7 +26,7 @@ class SongUrl {
     if (json['data'] != null) {
       data = <Data>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(Data.fromJson(v));
       });
     }
   }
