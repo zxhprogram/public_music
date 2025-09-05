@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:public_music/api/playlist_track_all.dart';
 import 'package:public_music/api/song_url.dart';
 import 'package:public_music/api/top_playlist.dart';
 
@@ -110,25 +111,55 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class SongDetailPage extends StatelessWidget {
+class SongDetailPage extends StatefulWidget {
   final PlayData song;
   const SongDetailPage({super.key, required this.song});
 
   @override
+  State<SongDetailPage> createState() => _SongDetailPageState();
+}
+
+class _SongDetailPageState extends State<SongDetailPage> {
+  PlaylistTrackAll? playlistTrackAll = null;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPlaylistTrackAll();
+  }
+
+  void fetchPlaylistTrackAll() async {
+    var playlistTrackAll = await playlist_track_all(widget.song.id.toString());
+    setState(() {
+      this.playlistTrackAll = playlistTrackAll;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(song.name)),
+      appBar: AppBar(title: Text(widget.song.name)),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              '${song.id}',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: buildSongList(),
+          ),
         ),
       ),
     );
+  }
+
+  List<Widget> buildSongList() {
+    if (playlistTrackAll == null) {
+      return [Text('Loading...')];
+    } else {
+      return playlistTrackAll!.songs!
+          .map(
+            (song) =>
+                Row(children: [Text(song.id.toString()), Text(song.name)]),
+          )
+          .toList();
+    }
   }
 }
