@@ -21,7 +21,7 @@ class PlaylistTrackAll {
 class Song {
   String name;
   int id;
-  bool isOk = false;
+  bool isOk = true;
 
   Song({required this.name, required this.id});
   factory Song.fromJson(Map<String, dynamic> json) {

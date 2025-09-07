@@ -3,6 +3,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:public_music/api/playlist_track_all.dart';
 import 'package:public_music/api/song_url.dart';
 import 'package:public_music/api/top_playlist.dart';
+import 'package:public_music/check_music.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -89,11 +90,11 @@ class _MyHomePageState extends State<MyHomePage> {
               },
               child: Row(
                 children: [
-                  SizedBox(
-                    height: 50,
-                    width: 50,
-                    child: Image.network(topPlayList!.data![index].coverImgUrl),
-                  ),
+                  // SizedBox(
+                  //   height: 50,
+                  //   width: 50,
+                  //   child: Image.network(topPlayList!.data![index].coverImgUrl),
+                  // ),
                   Text(topPlayList!.data![index].name),
                 ],
               ),
@@ -136,6 +137,13 @@ class _SongDetailPageState extends State<SongDetailPage> {
     setState(() {
       this.playlistTrackAll = playlistTrackAll;
     });
+    for (var e in playlistTrackAll.songs!) {
+      var s = await check_music('${e.id}');
+      e.isOk = s.success;
+      setState(() {
+        this.playlistTrackAll = playlistTrackAll;
+      });
+    }
   }
 
   @override
@@ -149,10 +157,11 @@ class _SongDetailPageState extends State<SongDetailPage> {
   ListView buildSongList() {
     return ListView.builder(
       itemBuilder: (context, index) {
+        var songO = playlistTrackAll!.songs![index];
         return GestureDetector(
           onTap: () async {
-            print('tapped ${playlistTrackAll!.songs![index].name}');
-            var song = await song_url('${playlistTrackAll!.songs![index].id}');
+            print('tapped ${songO.name}');
+            var song = await song_url('${songO.id}');
             var url = song.data![0].url;
             print('playing $url');
             var m = [Media(url!)];
@@ -163,11 +172,14 @@ class _SongDetailPageState extends State<SongDetailPage> {
           child: SizedBox(
             height: 50,
             width: 50,
-            child: Row(
-              children: [
-                Text(playlistTrackAll!.songs![index].id.toString()),
-                Text(playlistTrackAll!.songs![index].name),
-              ],
+            child: Container(
+              color: songO.isOk ? Colors.white : Colors.redAccent,
+              child: Row(
+                children: [
+                  Text(playlistTrackAll!.songs![index].id.toString()),
+                  Text(playlistTrackAll!.songs![index].name),
+                ],
+              ),
             ),
           ),
         );
